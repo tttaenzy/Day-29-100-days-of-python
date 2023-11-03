@@ -2,6 +2,7 @@ from random import *
 from tkinter import *
 from tkinter import messagebox
 import pyperclip
+import json
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def generate_password():
@@ -22,6 +23,16 @@ def generate_password():
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 def save_my_password():
+    website=website_entry.get()
+    password=password_entry.get()
+    email=email_entry.get()
+    new_data={
+        website:{
+        "email":email,
+        "password":password,
+    }
+    }
+
     if len(website_entry.get())==0:
         messagebox.showerror(title="Validation Error", message="Put your Website Name")
     elif len(email_entry.get())==0:
@@ -29,14 +40,31 @@ def save_my_password():
     elif len(password_entry.get())==0:
         messagebox.showerror(title="Validation Error", message="Password cannot be blank")
     else:
-        is_ok=messagebox.askokcancel(title=website_entry.get(), message=f"these are detail entered: \n EMAIL:{email_entry.get()}\n PASSWORD:{password_entry.get()}\n Save?")
-        if is_ok:
-            f = open("myPassword.txt", "a")
-            f.write(f"{website_entry.get()}|{email_entry.get()}|{password_entry.get()}\n")
+        try:
+            with open("data.json", "r") as f:
+                # read old data
+                data = json.load(f)
+        except FileNotFoundError:
+            with open("data.json","w")as f:
+                json.dump(new_data,f,indent=4)
+        else:
+            # update old data with new
+            data.update(new_data)
+
+
+
+            with open("data.json", "w") as f:
+                json.dump(data,f,indent=4)
+        finally:
             website_entry.delete(0, END)
             password_entry.delete(0, END)
             website_entry.focus()
-            f.close()
+
+
+def find_password():
+    
+
+
 
 
 
@@ -46,11 +74,10 @@ def save_my_password():
 
 window=Tk()
 window.title("Password Manager")
-window.minsize(height=350,width=350)
 window.config(padx=50,pady=50,bg="white")
 
 #image creation
-canvas=Canvas(width=200,height=200,bg="white",highlightthickness=0)
+canvas=Canvas(width=200,height=180,bg="white",highlightthickness=0)
 lock_image=PhotoImage(file="logo.png")
 canvas.create_image(100,100,image=lock_image)
 canvas.grid(row=0,column=1)
@@ -61,9 +88,11 @@ website_label.grid(row=1,column=0)
 
 
 website_entry=Entry(width=35)
-website_entry.grid(row=1,column=1,columnspan=2)
+website_entry.grid(row=1,column=1)
 website_entry.focus()
 
+website_button=Button(text="Search",width=8,command=find_password)
+website_button.grid(row=1,column=2)
 #email/username label and entrys
 email_label=Label(text="Email/Username:",bg="white")
 email_label.grid(row=2,column=0)
