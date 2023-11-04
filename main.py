@@ -61,13 +61,26 @@ def save_my_password():
             website_entry.focus()
 
 
+
+# ---------------------------- Find Password ------------------------------- #
 def find_password():
-    
-
-
-
-
-
+    website=website_entry.get()
+    try:
+        with open("data.json") as f:
+            data=json.load(f)
+    except FileNotFoundError:
+        messagebox.showinfo(title="NO File", message="Create File first")
+        website_entry.delete(0,END)
+    else:
+        if website in data:
+            email = data[website]['email']
+            password = data[website]['password']
+            messagebox.showinfo(title=website, message=f"email:{email}\n password:{password}")
+            website_entry.delete(0, END)
+        else:
+            messagebox.showinfo(title="Error", message=f"NO details for {website}")
+            website_entry.delete(0,END)
+            website_entry.focus()
 
 
 # ---------------------------- UI SETUP ------------------------------- #
